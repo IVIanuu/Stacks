@@ -300,18 +300,20 @@ class Backstack internal constructor(
             val backstackFilter = keyFilter ?: DefaultKeyFilter()
             val tag = tag ?: ""
 
-            return Backstack(backstackFilter, initialKeys,
-                keyParceler, tag, stateChangeListeners).apply {
-                val savedInstanceState = savedInstanceState
-                if (savedInstanceState != null) {
-                    restoreInstanceState(savedInstanceState)
-                }
+            val backstack = Backstack(backstackFilter, initialKeys,
+                keyParceler, tag, stateChangeListeners)
 
-                val stateChanger = stateChanger
-                if (stateChanger != null) {
-                    setStateChanger(stateChanger)
-                }
+            val savedInstanceState = savedInstanceState
+            if (savedInstanceState != null) {
+                backstack.restoreInstanceState(savedInstanceState)
             }
+
+            val stateChanger = stateChanger
+            if (stateChanger != null) {
+                backstack.setStateChanger(stateChanger)
+            }
+
+            return backstack
         }
 
     }
