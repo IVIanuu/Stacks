@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ivianuu.stacks.sample
+package com.ivianuu.stacks.sample.fragments
 
 import android.os.Bundle
 import android.os.Parcelable
@@ -22,14 +22,16 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.ivianuu.stacks.sample.MainActivity
+import com.ivianuu.stacks.sample.R
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.fragment_dummy.*
+import kotlinx.android.synthetic.main.view_dummy.*
 
 @Parcelize
-data class DummyKey(val count: Int) : FragmentKey, Parcelable {
+data class DummyFragmentKey(val count: Int) : FragmentKey, Parcelable {
     override fun createFragment() = DummyFragment().apply {
         arguments = Bundle().apply {
-            putParcelable("key", this@DummyKey)
+            putParcelable("key", this@DummyFragmentKey)
         }
     }
 }
@@ -44,21 +46,21 @@ class DummyFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_dummy, container, false)
+        return inflater.inflate(R.layout.view_dummy, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val stack = (activity as MainActivity).backstack
-        val key = arguments!!.getParcelable<DummyKey>("key")
+        val stack = (activity as FragmentsActivity).backstack
+        val key = arguments!!.getParcelable<DummyFragmentKey>("key")
 
         title.text = "Count: ${key.count}"
-        next.setOnClickListener { stack.goTo(DummyKey(key.count + 1)) }
+        next.setOnClickListener { stack.goTo(DummyFragmentKey(key.count + 1)) }
         prev.setOnClickListener { stack.goBack() }
         go_to_root.setOnClickListener { stack.jumpToRoot() }
         go_up_5.setOnClickListener {
-            (1..5).forEach { stack.goTo(DummyKey(key.count + it)) }
+            (1..5).forEach { stack.goTo(DummyFragmentKey(key.count + it)) }
         }
 
         go_to_third.setOnClickListener {

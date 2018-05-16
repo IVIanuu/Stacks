@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.ivianuu.stacks.sample
+package com.ivianuu.stacks.sample.fragments
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import com.ivianuu.stacks.StateChange
 import com.ivianuu.stacks.StateChanger
 
-open class FragmentStateChanger(
+class FragmentStateChanger(
     val fm: FragmentManager,
     val containerId: Int
 ) : StateChanger {
@@ -54,7 +54,7 @@ open class FragmentStateChanger(
                         transaction.attach(fragment)
                     }
                 } else {
-                    fragment = createFragment(newKey, stateChange)
+                    fragment = createFragment(newKey)
                     transaction.add(containerId, fragment, getFragmentTag(newKey))
                 }
             } else {
@@ -68,7 +68,7 @@ open class FragmentStateChanger(
         listener.onCompleted()
     }
 
-    protected open fun createFragment(key: Any, stateChange: StateChange) : Fragment {
+    private fun createFragment(key: Any) : Fragment {
         if (key is FragmentKey) {
             return key.createFragment()
         } else {
@@ -76,5 +76,5 @@ open class FragmentStateChanger(
         }
     }
 
-    protected open fun getFragmentTag(key: Any) = key.toString()
+    private fun getFragmentTag(key: Any) = key.toString()
 }

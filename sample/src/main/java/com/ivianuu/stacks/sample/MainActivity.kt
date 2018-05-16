@@ -16,57 +16,25 @@
 
 package com.ivianuu.stacks.sample
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.ivianuu.stacks.Backstack
 import com.ivianuu.stacks.StateChange
 import com.ivianuu.stacks.StateChangeListener
+import com.ivianuu.stacks.sample.fragments.FragmentStateChanger
+import com.ivianuu.stacks.sample.fragments.FragmentsActivity
+import com.ivianuu.stacks.sample.util.d
+import com.ivianuu.stacks.sample.views.ViewsActivity
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var backstack: Backstack
-
-    private val stateChanger by lazy(LazyThreadSafetyMode.NONE) {
-        FragmentStateChanger(supportFragmentManager, android.R.id.content)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        backstack = Backstack.newBuilder()
-            .initialKeys(DummyKey(1))
-            .savedInstanceState(savedInstanceState)
-            .stateChanger(stateChanger)
-            .addStateChangeListeners(object : StateChangeListener {
-                override fun preStateChange(stateChange: StateChange) {
-                    this@MainActivity.d { "pre state change $stateChange" }
-                }
-
-                override fun postStateChange(stateChange: StateChange) {
-                    this@MainActivity.d { "post state change $stateChange" }
-                }
-            })
-            .build()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        backstack.setStateChanger(stateChanger)
-    }
-
-    override fun onPause() {
-        backstack.removeStateChanger()
-        super.onPause()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        backstack.saveInstanceState(outState)
-    }
-
-    override fun onBackPressed() {
-        if (!backstack.goBack()) {
-            super.onBackPressed()
-        }
+        fragments.setOnClickListener { startActivity(Intent(this, FragmentsActivity::class.java)) }
+        views.setOnClickListener { startActivity(Intent(this, ViewsActivity::class.java)) }
     }
 }

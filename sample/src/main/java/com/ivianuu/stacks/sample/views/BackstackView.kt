@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.ivianuu.stacks.sample
+package com.ivianuu.stacks.sample.views
 
-import android.support.v4.app.Fragment
+import com.ivianuu.stacks.Backstack
 
 /**
  * @author Manuel Wrage (IVIanuu)
  */
-interface FragmentKey {
-    fun createFragment(): Fragment
+interface BackstackView {
+    var key: Any
+    var backstack: Backstack
 }

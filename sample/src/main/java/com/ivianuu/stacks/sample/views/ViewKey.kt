@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.ivianuu.stacks.sample
+package com.ivianuu.stacks.sample.views
 
-import android.util.Log
-
-fun Any.d(m: () -> String) {
-    Log.d(this.javaClass.simpleName, m())
+/**
+ * @author Manuel Wrage (IVIanuu)
+ */
+interface ViewKey {
+    val layoutRes: Int
 }
