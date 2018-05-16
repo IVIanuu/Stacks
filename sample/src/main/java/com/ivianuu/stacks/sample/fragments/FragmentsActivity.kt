@@ -18,6 +18,7 @@ package com.ivianuu.stacks.sample.fragments
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import com.ivianuu.stacks.Backstack
 
 class FragmentsActivity : AppCompatActivity() {
@@ -35,25 +36,11 @@ class FragmentsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         backstack = Backstack.newBuilder()
-            .initialKeys(DummyFragmentKey(1))
+            .activity(this)
             .savedInstanceState(savedInstanceState)
+            .initialKeys(DummyFragmentKey(1))
             .stateChanger(stateChanger)
             .build()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        backstack.setStateChanger(stateChanger)
-    }
-
-    override fun onPause() {
-        backstack.removeStateChanger()
-        super.onPause()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        backstack.saveInstanceState(outState)
     }
 
     override fun onBackPressed() {

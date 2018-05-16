@@ -1,7 +1,11 @@
 package com.ivianuu.stacks
 
+import android.app.Activity
+import android.app.Application
 import android.os.Bundle
 import android.os.Parcelable
+import android.support.v4.app.FragmentActivity
+import android.util.Log
 import java.util.*
 
 /**
@@ -12,7 +16,8 @@ class Backstack internal constructor(
     val initialKeys: List<Any>,
     var keyParceler: KeyParceler,
     val tag: String,
-    stateChangeListeners: Collection<StateChangeListener>
+    stateChangeListeners: Collection<StateChangeListener>,
+    activity: FragmentActivity?
 ) {
 
     private var stateChanger: StateChanger? = null
@@ -23,8 +28,30 @@ class Backstack internal constructor(
 
     private val stateChangeListeners = mutableListOf<StateChangeListener>()
 
+    private val lifecycleListener = object : LifecycleListener.Listener {
+        override fun onResume() {
+            activityPaused = false
+            beginStateChangeIfPossible()
+        }
+
+        override fun onPause() {
+            activityPaused = true
+        }
+
+        override fun onSaveInstanceState(outState: Bundle) {
+            saveInstanceState(outState)
+        }
+    }
+
+    private var activityPaused = false
+
     init {
         this.stateChangeListeners.addAll(stateChangeListeners)
+
+        activity?.let {
+            val listener = LifecycleListener.install(it)
+            listener.addListener(lifecycleListener)
+        }
     }
 
     fun goTo(newKey: Any) {
@@ -178,7 +205,7 @@ class Backstack internal constructor(
     }
 
     private fun beginStateChangeIfPossible(): Boolean {
-        if (stateChanger != null && hasPendingStateChange()) {
+        if (stateChanger != null && !activityPaused && hasPendingStateChange()) {
             val pendingStateChange = queuedStateChanges.first
             if (pendingStateChange.status == PendingStateChange.Status.ENQUEUED) {
                 pendingStateChange.status = PendingStateChange.Status.IN_PROGRESS
@@ -245,6 +272,7 @@ class Backstack internal constructor(
         private var tag: String? = null
         private var stateChanger: StateChanger? = null
         private val stateChangeListeners = mutableListOf<StateChangeListener>()
+        private var activity: FragmentActivity? = null
 
         fun initialKeys(vararg initialKeys: Any): Builder {
             this.initialKeys.addAll(initialKeys)
@@ -291,6 +319,11 @@ class Backstack internal constructor(
             return this
         }
 
+        fun activity(activity: FragmentActivity): Builder {
+            this.activity = activity
+            return this
+        }
+
         fun build(): Backstack {
             if (initialKeys.isEmpty()) {
                 throw IllegalStateException("at least one initial key must be set")
@@ -301,7 +334,7 @@ class Backstack internal constructor(
             val tag = tag ?: ""
 
             val backstack = Backstack(backstackFilter, initialKeys,
-                keyParceler, tag, stateChangeListeners)
+                keyParceler, tag, stateChangeListeners, activity)
 
             val savedInstanceState = savedInstanceState
             if (savedInstanceState != null) {

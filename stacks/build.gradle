@@ -31,6 +31,7 @@ android {
 
 dependencies {
     api Deps.kotlinStdLib
+    api Deps.supportFragments
 }
 
 // build a jar with source files

@@ -23,4 +23,5 @@ object Deps {
     const val mavenGradlePlugin = "com.github.dcendents:android-maven-gradle-plugin:${Versions.mavenGradle}"
 
     const val supportAppCompat = "com.android.support:appcompat-v7:${Versions.support}"
+    const val supportFragments = "com.android.support:support-fragment:${Versions.support}"
 }
