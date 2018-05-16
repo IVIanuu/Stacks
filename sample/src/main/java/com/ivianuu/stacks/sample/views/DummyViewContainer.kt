@@ -19,6 +19,7 @@ package com.ivianuu.stacks.sample.views
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.SparseArray
 import android.widget.FrameLayout
 import com.ivianuu.stacks.Backstack
 import com.ivianuu.stacks.sample.R
@@ -61,4 +62,13 @@ class DummyViewContainer @JvmOverloads constructor(
         }
     }
 
+    override fun saveHierarchyState(container: SparseArray<Parcelable>?) {
+        d { "save hierarchy state" }
+        super.saveHierarchyState(container)
+    }
+
+    override fun restoreHierarchyState(container: SparseArray<Parcelable>?) {
+        d { "restore hierarchy state" }
+        super.restoreHierarchyState(container)
+    }
 }

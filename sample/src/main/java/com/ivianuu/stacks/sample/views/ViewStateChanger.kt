@@ -37,9 +37,12 @@ class ViewStateChanger(
         val topOldKey = stateChange.previousState.lastOrNull()
         if (topOldKey != null) {
             val oldView = container.getChildAt(0)
-            val savedState = SparseArray<Parcelable>()
-            oldView.saveHierarchyState(savedState)
-            savedStates[topOldKey] = savedState
+
+            if (stateChange.newState.contains(topOldKey)) {
+                val savedState = SparseArray<Parcelable>()
+                oldView.saveHierarchyState(savedState)
+                savedStates[topOldKey] = savedState
+            }
 
             container.removeView(oldView)
         }
@@ -60,6 +63,12 @@ class ViewStateChanger(
             }
 
             container.addView(view)
+        }
+
+        savedStates.keys.toList().forEach { key ->
+            if (!stateChange.newState.contains(key)) {
+                savedStates.remove(key)
+            }
         }
 
         listener.onCompleted()
