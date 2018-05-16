@@ -41,11 +41,25 @@ class ViewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         backstack = Backstack.newBuilder()
-            .activity(this)
-            .savedInstanceState(savedInstanceState)
             .initialKeys(DummyViewContainerKey(1))
+            .savedInstanceState(savedInstanceState)
             .stateChanger(stateChanger)
             .build()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        backstack.setStateChanger(stateChanger)
+    }
+
+    override fun onPause() {
+        backstack.removeStateChanger()
+        super.onPause()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        backstack.saveInstanceState(outState)
     }
 
     override fun onBackPressed() {
