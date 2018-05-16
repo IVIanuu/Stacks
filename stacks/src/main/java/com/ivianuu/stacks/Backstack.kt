@@ -168,7 +168,7 @@ class Backstack internal constructor(
     }
 
     private fun selectActiveBackstack(): List<Any> {
-        return if(backstack.isEmpty() && queuedStateChanges.size <= 0) {
+        return if(backstack.isEmpty() && queuedStateChanges.isEmpty()) {
             initialKeys.toList()
         } else if(queuedStateChanges.isEmpty()) {
             backstack.toList()
@@ -218,7 +218,9 @@ class Backstack internal constructor(
 
         stateChangeListeners.forEach { it.preStateChange(stateChange) }
 
-        stateChanger!!.handleStateChange(stateChange, completionCallback)
+        val stateChanger = stateChanger ?: throw IllegalStateException("state changer is null")
+
+        stateChanger.handleStateChange(stateChange, completionCallback)
     }
 
     private fun completeStateChange(stateChange: StateChange) {
