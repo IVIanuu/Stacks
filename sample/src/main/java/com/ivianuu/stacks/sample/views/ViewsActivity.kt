@@ -16,15 +16,9 @@
 
 package com.ivianuu.stacks.sample.views
 
-import android.app.Activity
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.ivianuu.stacks.Backstack
-import com.ivianuu.stacks.StateChange
-import com.ivianuu.stacks.StateChangeListener
-import com.ivianuu.stacks.sample.fragments.DummyFragmentKey
-import com.ivianuu.stacks.sample.fragments.FragmentStateChanger
-import com.ivianuu.stacks.sample.util.d
 
 /**
  * @author Manuel Wrage (IVIanuu)

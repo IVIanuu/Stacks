@@ -1,11 +1,8 @@
 package com.ivianuu.stacks
 
-import android.app.Activity
-import android.app.Application
 import android.os.Bundle
 import android.os.Parcelable
 import android.support.v4.app.FragmentActivity
-import android.util.Log
 import java.util.*
 
 /**
@@ -17,7 +14,7 @@ class Backstack internal constructor(
     var keyParceler: KeyParceler,
     val tag: String,
     stateChangeListeners: Collection<StateChangeListener>,
-    activity: FragmentActivity?
+    activity: FragmentActivity
 ) {
 
     private var stateChanger: StateChanger? = null
@@ -329,6 +326,7 @@ class Backstack internal constructor(
                 throw IllegalStateException("at least one initial key must be set")
             }
 
+            val activity = activity ?: throw IllegalStateException("activity must be set")
             val keyParceler = keyParceler ?: DefaultKeyParceler()
             val backstackFilter = keyFilter ?: DefaultKeyFilter()
             val tag = tag ?: ""

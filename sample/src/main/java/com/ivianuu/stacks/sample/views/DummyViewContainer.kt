@@ -23,8 +23,6 @@ import android.util.SparseArray
 import android.widget.FrameLayout
 import com.ivianuu.stacks.Backstack
 import com.ivianuu.stacks.sample.R
-import com.ivianuu.stacks.sample.fragments.DummyFragmentKey
-import com.ivianuu.stacks.sample.fragments.FragmentsActivity
 import com.ivianuu.stacks.sample.util.d
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.view_dummy.view.*

@@ -19,12 +19,7 @@ package com.ivianuu.stacks.sample
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.ivianuu.stacks.Backstack
-import com.ivianuu.stacks.StateChange
-import com.ivianuu.stacks.StateChangeListener
-import com.ivianuu.stacks.sample.fragments.FragmentStateChanger
 import com.ivianuu.stacks.sample.fragments.FragmentsActivity
-import com.ivianuu.stacks.sample.util.d
 import com.ivianuu.stacks.sample.views.ViewsActivity
 import kotlinx.android.synthetic.main.activity_main.*
 

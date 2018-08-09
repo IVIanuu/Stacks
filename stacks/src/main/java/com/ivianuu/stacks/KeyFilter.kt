@@ -22,3 +22,10 @@ package com.ivianuu.stacks
 interface KeyFilter {
     fun filter(backstack: List<Any>): List<Any>
 }
+
+/**
+ * Default backstack filter which retains all keys
+ */
+class DefaultKeyFilter : KeyFilter {
+    override fun filter(backstack: List<Any>) = backstack
+}

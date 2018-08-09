@@ -17,11 +17,11 @@
 package com.ivianuu.stacks.sample.views
 
 import android.os.Parcelable
+import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.ivianuu.stacks.StateChange
 import com.ivianuu.stacks.StateChanger
-import android.util.SparseArray
 
 /**
  * @author Manuel Wrage (IVIanuu)
