@@ -24,12 +24,13 @@ import android.widget.FrameLayout
 import com.ivianuu.stacks.Backstack
 import com.ivianuu.stacks.sample.R
 import com.ivianuu.stacks.sample.util.d
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.view_dummy.view.*
 
 @Parcelize
 data class DummyViewContainerKey(val count: Int) : ViewKey, Parcelable {
-    override val layoutRes = R.layout.view_dummy_container
+    @IgnoredOnParcel override val layoutRes = R.layout.view_dummy_container
 }
 
 /**

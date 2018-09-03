@@ -44,11 +44,8 @@ class Backstack internal constructor(
 
     init {
         this.stateChangeListeners.addAll(stateChangeListeners)
-
-        activity?.let {
-            val listener = LifecycleListener.install(it)
-            listener.addListener(lifecycleListener)
-        }
+        val listener = LifecycleListener.install(activity)
+        listener.addListener(lifecycleListener)
     }
 
     fun goTo(newKey: Any) {

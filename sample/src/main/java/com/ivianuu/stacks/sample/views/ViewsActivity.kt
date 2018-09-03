@@ -41,8 +41,8 @@ class ViewsActivity : AppCompatActivity() {
             .build()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onResumeFragments() {
+        super.onResumeFragments()
         backstack.setStateChanger(stateChanger)
     }
 
