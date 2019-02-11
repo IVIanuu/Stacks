@@ -6,12 +6,12 @@ import android.support.v4.app.FragmentActivity
 import java.util.*
 
 /**
- * Backstack
+ * Router
  */
-class Backstack internal constructor(
+class Router internal constructor(
     var keyFilter: KeyFilter,
     val initialKeys: List<Any>,
-    var keyParceler: KeyParceler,
+    var parceler: Parceler,
     val tag: String,
     stateChangeListeners: Collection<StateChangeListener>,
     activity: FragmentActivity
@@ -167,13 +167,13 @@ class Backstack internal constructor(
     fun restoreInstanceState(savedInstanceState: Bundle) {
         val keys =
             savedInstanceState.getParcelableArrayList<Parcelable>(KEY_BACKSTACK + tag)
-                .map { keyParceler.fromParcelable(it) }
+                .map { parceler.fromParcelable(it) }
         setBackstack(keys)
     }
 
     fun saveInstanceState(outState: Bundle) {
         val filteredBackstack = keyFilter.filter(backstack)
-        val parcelledKeys = filteredBackstack.map { keyParceler.toParcelable(it) }
+        val parcelledKeys = filteredBackstack.map { parceler.toParcelable(it) }
         outState.putParcelableArrayList(KEY_BACKSTACK + tag, ArrayList(parcelledKeys))
     }
 
@@ -229,19 +229,15 @@ class Backstack internal constructor(
             this
         )
 
-        val completionCallback = object : StateChanger.Callback {
-            override fun onCompleted() {
-                completeStateChange(stateChange)
-            }
-        }
+        val completionListener = { completeStateChange(stateChange) }
 
-        pendingStateChange.completionCallback = completionCallback
+        pendingStateChange.completionListener = completionListener
 
         stateChangeListeners.forEach { it.preStateChange(stateChange) }
 
         val stateChanger = stateChanger ?: throw IllegalStateException("state changer is null")
 
-        stateChanger.handleStateChange(stateChange, completionCallback)
+        stateChanger.handleStateChange(stateChange, completionListener)
     }
 
     private fun completeStateChange(stateChange: StateChange) {
@@ -261,7 +257,7 @@ class Backstack internal constructor(
     class Builder internal constructor() {
         private val initialKeys = mutableListOf<Any>()
         private var savedInstanceState: Bundle? = null
-        private var keyParceler: KeyParceler? = null
+        private var parceler: Parceler? = null
         private var keyFilter: KeyFilter? = null
         private var tag: String? = null
         private var stateChanger: StateChanger? = null
@@ -283,8 +279,8 @@ class Backstack internal constructor(
             return this
         }
 
-        fun keyParceler(keyParceler: KeyParceler): Builder {
-            this.keyParceler = keyParceler
+        fun keyParceler(parceler: Parceler): Builder {
+            this.parceler = parceler
             return this
         }
 
@@ -318,17 +314,18 @@ class Backstack internal constructor(
             return this
         }
 
-        fun build(): Backstack {
+        fun build(): Router {
             if (initialKeys.isEmpty()) {
                 throw IllegalStateException("at least one initial key must be set")
             }
 
             val activity = activity ?: throw IllegalStateException("activity must be set")
-            val keyParceler = keyParceler ?: DefaultKeyParceler()
+            val keyParceler = parceler ?: DefaultParceler()
             val backstackFilter = keyFilter ?: DefaultKeyFilter()
             val tag = tag ?: ""
 
-            val backstack = Backstack(backstackFilter, initialKeys,
+            val backstack = Router(
+                backstackFilter, initialKeys,
                 keyParceler, tag, stateChangeListeners, activity)
 
             val savedInstanceState = savedInstanceState
@@ -347,7 +344,7 @@ class Backstack internal constructor(
     }
 
     companion object {
-        private const val KEY_BACKSTACK = "Backstack.backstack"
+        private const val KEY_BACKSTACK = "Router.router"
 
         fun newBuilder() = Builder()
     }

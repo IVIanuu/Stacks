@@ -24,7 +24,12 @@ import android.view.View
 import android.view.ViewGroup
 import com.ivianuu.stacks.sample.R
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.view_dummy.*
+import kotlinx.android.synthetic.main.view_dummy.go_to_root
+import kotlinx.android.synthetic.main.view_dummy.go_to_third
+import kotlinx.android.synthetic.main.view_dummy.go_up_5
+import kotlinx.android.synthetic.main.view_dummy.next
+import kotlinx.android.synthetic.main.view_dummy.prev
+import kotlinx.android.synthetic.main.view_dummy.title
 
 @Parcelize
 data class DummyFragmentKey(val count: Int) : FragmentKey, Parcelable {
@@ -51,7 +56,7 @@ class DummyFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val stack = (activity as FragmentsActivity).backstack
+        val stack = (activity as FragmentsActivity).router
         val key = arguments!!.getParcelable<DummyFragmentKey>("key")
 
         title.text = "Count: ${key.count}"

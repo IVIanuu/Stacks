@@ -25,10 +25,10 @@ internal data class PendingStateChange(
     val init: Boolean
 ) {
 
-    var completionCallback: StateChanger.Callback? = null
+    var completionListener: (() -> Unit)? = null
     var status: Status = Status.ENQUEUED
 
-    internal enum class Status {
+    enum class Status {
         ENQUEUED,
         IN_PROGRESS,
         COMPLETED

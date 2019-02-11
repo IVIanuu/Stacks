@@ -21,12 +21,17 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.widget.FrameLayout
-import com.ivianuu.stacks.Backstack
+import com.ivianuu.stacks.Router
 import com.ivianuu.stacks.sample.R
 import com.ivianuu.stacks.sample.util.d
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.view_dummy.view.*
+import kotlinx.android.synthetic.main.view_dummy.view.go_to_root
+import kotlinx.android.synthetic.main.view_dummy.view.go_to_third
+import kotlinx.android.synthetic.main.view_dummy.view.go_up_5
+import kotlinx.android.synthetic.main.view_dummy.view.next
+import kotlinx.android.synthetic.main.view_dummy.view.prev
+import kotlinx.android.synthetic.main.view_dummy.view.title
 
 @Parcelize
 data class DummyViewContainerKey(val count: Int) : ViewKey, Parcelable {
@@ -41,7 +46,7 @@ class DummyViewContainer @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr), BackstackView {
 
     override lateinit var key: Any
-    override lateinit var backstack: Backstack
+    override lateinit var router: Router
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -49,15 +54,15 @@ class DummyViewContainer @JvmOverloads constructor(
         val key = key as DummyViewContainerKey
 
         title.text = "Count: ${key.count}"
-        next.setOnClickListener { backstack.goTo(DummyViewContainerKey(key.count + 1)) }
-        prev.setOnClickListener { backstack.goBack() }
-        go_to_root.setOnClickListener { backstack.jumpToRoot() }
+        next.setOnClickListener { router.goTo(DummyViewContainerKey(key.count + 1)) }
+        prev.setOnClickListener { router.goBack() }
+        go_to_root.setOnClickListener { router.jumpToRoot() }
         go_up_5.setOnClickListener {
-            (1..5).forEach { backstack.goTo(DummyViewContainerKey(key.count + it)) }
+            (1..5).forEach { router.goTo(DummyViewContainerKey(key.count + it)) }
         }
 
         go_to_third.setOnClickListener {
-            backstack.setBackstack(backstack.getBackstack().take(3))
+            router.setBackstack(router.getBackstack().take(3))
         }
     }
 

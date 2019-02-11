@@ -33,7 +33,7 @@ class ViewStateChanger(
 
     private val savedStates = mutableMapOf<Any, SparseArray<Parcelable>>()
 
-    override fun handleStateChange(stateChange: StateChange, listener: StateChanger.Callback) {
+    override fun handleStateChange(stateChange: StateChange, listener: () -> Unit) {
         val topOldKey = stateChange.previousState.lastOrNull()
         if (topOldKey != null) {
             val oldView = container.getChildAt(0)
@@ -53,7 +53,7 @@ class ViewStateChanger(
                 .inflate((topNewKey as ViewKey).layoutRes, container, false)
 
             if (view is BackstackView) {
-                view.backstack = stateChange.backstack
+                view.router = stateChange.router
                 view.key = topNewKey
             }
 
@@ -71,7 +71,7 @@ class ViewStateChanger(
             }
         }
 
-        listener.onCompleted()
+        listener()
     }
 
 }

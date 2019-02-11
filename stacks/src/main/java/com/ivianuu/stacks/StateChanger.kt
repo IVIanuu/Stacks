@@ -1,14 +1,10 @@
 package com.ivianuu.stacks
 
 /**
- * Reflects the state of the backstack
+ * Reflects the state of the router
  */
 interface StateChanger {
 
-    fun handleStateChange(stateChange: StateChange, listener: Callback)
-
-    interface Callback {
-        fun onCompleted()
-    }
+    fun handleStateChange(stateChange: StateChange, listener: () -> Unit)
 
 }

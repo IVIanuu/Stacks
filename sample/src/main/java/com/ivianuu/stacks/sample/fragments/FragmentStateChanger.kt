@@ -28,7 +28,7 @@ class FragmentStateChanger(
 
     override fun handleStateChange(
         stateChange: StateChange,
-        listener: StateChanger.Callback
+        listener: () -> Unit
     ) {
         val previousState = stateChange.previousState
         val newState = stateChange.newState
@@ -65,7 +65,7 @@ class FragmentStateChanger(
         }
 
         transaction.commitNow()
-        listener.onCompleted()
+        listener()
     }
 
     private fun createFragment(key: Any) : Fragment {

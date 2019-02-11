@@ -16,12 +16,12 @@
 
 package com.ivianuu.stacks.sample.views
 
-import com.ivianuu.stacks.Backstack
+import com.ivianuu.stacks.Router
 
 /**
  * @author Manuel Wrage (IVIanuu)
  */
 interface BackstackView {
     var key: Any
-    var backstack: Backstack
+    var router: Router
 }

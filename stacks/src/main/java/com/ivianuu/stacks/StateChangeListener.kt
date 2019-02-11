@@ -20,6 +20,9 @@ package com.ivianuu.stacks
  * A listener for [StateChange]'s
  */
 interface StateChangeListener {
-    fun preStateChange(stateChange: StateChange) {}
-    fun postStateChange(stateChange: StateChange) {}
+    fun preStateChange(stateChange: StateChange) {
+    }
+
+    fun postStateChange(stateChange: StateChange) {
+    }
 }

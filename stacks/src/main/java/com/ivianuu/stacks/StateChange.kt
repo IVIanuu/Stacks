@@ -7,5 +7,5 @@ data class StateChange(
     val previousState: List<Any>,
     val newState: List<Any>,
     val direction: Direction,
-    val backstack: Backstack
+    val router: Router
 )

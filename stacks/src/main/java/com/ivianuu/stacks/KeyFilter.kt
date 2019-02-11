@@ -24,7 +24,7 @@ interface KeyFilter {
 }
 
 /**
- * Default backstack filter which retains all keys
+ * Default router filter which retains all keys
  */
 class DefaultKeyFilter : KeyFilter {
     override fun filter(backstack: List<Any>) = backstack

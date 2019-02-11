@@ -18,14 +18,14 @@ package com.ivianuu.stacks.sample.views
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.ivianuu.stacks.Backstack
+import com.ivianuu.stacks.Router
 
 /**
  * @author Manuel Wrage (IVIanuu)
  */
 class ViewsActivity : AppCompatActivity() {
 
-    lateinit var backstack: Backstack
+    lateinit var router: Router
 
     private val stateChanger by lazy(LazyThreadSafetyMode.NONE) {
         ViewStateChanger(findViewById(android.R.id.content), layoutInflater)
@@ -34,7 +34,7 @@ class ViewsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        backstack = Backstack.newBuilder()
+        router = Router.newBuilder()
             .initialKeys(DummyViewContainerKey(1))
             .savedInstanceState(savedInstanceState)
             .stateChanger(stateChanger)
@@ -43,21 +43,21 @@ class ViewsActivity : AppCompatActivity() {
 
     override fun onResumeFragments() {
         super.onResumeFragments()
-        backstack.setStateChanger(stateChanger)
+        router.setStateChanger(stateChanger)
     }
 
     override fun onPause() {
-        backstack.removeStateChanger()
+        router.removeStateChanger()
         super.onPause()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        backstack.saveInstanceState(outState)
+        router.saveInstanceState(outState)
     }
 
     override fun onBackPressed() {
-        if (!backstack.goBack()) {
+        if (!router.goBack()) {
             super.onBackPressed()
         }
     }
