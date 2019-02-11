@@ -22,6 +22,8 @@ import android.util.AttributeSet
 import android.util.SparseArray
 import android.widget.FrameLayout
 import com.ivianuu.stacks.Router
+import com.ivianuu.stacks.popToRoot
+import com.ivianuu.stacks.push
 import com.ivianuu.stacks.sample.R
 import com.ivianuu.stacks.sample.util.d
 import kotlinx.android.parcel.IgnoredOnParcel
@@ -54,15 +56,15 @@ class DummyViewContainer @JvmOverloads constructor(
         val key = key as DummyViewContainerKey
 
         title.text = "Count: ${key.count}"
-        next.setOnClickListener { router.goTo(DummyViewContainerKey(key.count + 1)) }
+        next.setOnClickListener { router.push(DummyViewContainerKey(key.count + 1)) }
         prev.setOnClickListener { router.goBack() }
-        go_to_root.setOnClickListener { router.jumpToRoot() }
+        go_to_root.setOnClickListener { router.popToRoot() }
         go_up_5.setOnClickListener {
-            (1..5).forEach { router.goTo(DummyViewContainerKey(key.count + it)) }
+            (1..5).forEach { router.push(DummyViewContainerKey(key.count + it)) }
         }
 
         go_to_third.setOnClickListener {
-            router.setBackstack(router.getBackstack().take(3))
+            router.setBackstack(router.backstack.take(3))
         }
     }
 

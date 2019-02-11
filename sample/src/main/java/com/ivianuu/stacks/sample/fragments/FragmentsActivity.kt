@@ -19,6 +19,8 @@ package com.ivianuu.stacks.sample.fragments
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.ivianuu.stacks.Router
+import com.ivianuu.stacks.hasRoot
+import com.ivianuu.stacks.setRoot
 
 class FragmentsActivity : AppCompatActivity() {
 
@@ -35,11 +37,13 @@ class FragmentsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         router = Router.newBuilder()
-            .activity(this)
-            .initialKeys(DummyFragmentKey(1))
             .savedInstanceState(savedInstanceState)
             .stateChanger(stateChanger)
             .build()
+
+        if (!router.hasRoot) {
+            router.setRoot(DummyFragmentKey(1))
+        }
     }
 
     override fun onResumeFragments() {

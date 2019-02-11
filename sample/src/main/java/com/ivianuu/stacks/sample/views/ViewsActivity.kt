@@ -19,6 +19,8 @@ package com.ivianuu.stacks.sample.views
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.ivianuu.stacks.Router
+import com.ivianuu.stacks.hasRoot
+import com.ivianuu.stacks.setRoot
 
 /**
  * @author Manuel Wrage (IVIanuu)
@@ -35,11 +37,13 @@ class ViewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         router = Router.newBuilder()
-            .activity(this)
-            .initialKeys(DummyViewContainerKey(1))
             .savedInstanceState(savedInstanceState)
             .stateChanger(stateChanger)
             .build()
+
+        if (!router.hasRoot) {
+            router.setRoot(DummyViewContainerKey(1))
+        }
     }
 
     override fun onResumeFragments() {

@@ -2,7 +2,6 @@ package com.ivianuu.stacks
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.FragmentActivity
 import java.util.*
 
 /**
@@ -10,102 +9,26 @@ import java.util.*
  */
 class Router internal constructor(
     var keyFilter: KeyFilter,
-    val initialKeys: List<Any>,
     var parceler: Parceler,
-    val tag: String,
-    stateChangeListeners: Collection<StateChangeListener>,
-    activity: FragmentActivity
+    val tag: String
 ) {
 
-    private var stateChanger: StateChanger? = null
+    var stateChanger: StateChanger? = null
+        private set
 
-    private val backstack = mutableListOf<Any>()
+    val backstack: List<Any> get() = _backstack
+    private val _backstack = mutableListOf<Any>()
 
     private val queuedStateChanges = LinkedList<PendingStateChange>()
 
     private val stateChangeListeners = mutableListOf<StateChangeListener>()
-
-    private val lifecycleListener = object : LifecycleListener.Listener {
-        override fun onResume() {
-            activityPaused = false
-            beginStateChangeIfPossible()
-        }
-
-        override fun onPause() {
-            activityPaused = true
-        }
-
-        override fun onSaveInstanceState(outState: Bundle) {
-            saveInstanceState(outState)
-        }
-    }
-
-    private var activityPaused = false
-
-    init {
-        this.stateChangeListeners.addAll(stateChangeListeners)
-        val listener = LifecycleListener.install(activity)
-        listener.addListener(lifecycleListener)
-    }
-
-    fun goTo(newKey: Any) {
-        val newBackstack = mutableListOf<Any>()
-        val activeBackstack = selectActiveBackstack()
-
-        if (activeBackstack.isNotEmpty()
-            && activeBackstack.last() == newKey) {
-            newBackstack.addAll(activeBackstack)
-            enqueueStateChange(newBackstack, Direction.REPLACE)
-            return
-        }
-
-        var isNewKey = true
-        for (key in activeBackstack) {
-            newBackstack.add(key)
-            if (key == newKey) {
-                isNewKey = false
-                break
-            }
-        }
-        val direction = if (isNewKey) {
-            newBackstack.add(newKey)
-            Direction.FORWARD
-        } else {
-            Direction.BACKWARD
-        }
-
-        enqueueStateChange(newBackstack, direction)
-    }
-
-    fun replaceTop(newTop: Any, direction: Direction = Direction.REPLACE) {
-        val newBackstack = selectActiveBackstack().toMutableList()
-        if (newBackstack.isNotEmpty()) {
-            newBackstack.removeAt(newBackstack.lastIndex)
-        }
-        newBackstack.add(newTop)
-        setBackstack(newBackstack, direction)
-    }
-
-    fun goUp(newKey: Any) {
-        val activeBackstack = selectActiveBackstack()
-
-        if (activeBackstack.size <= 1) {
-            replaceTop(newKey, Direction.BACKWARD)
-            return
-        }
-        if (activeBackstack.contains(newKey)) {
-            goTo(newKey)
-        } else {
-            replaceTop(newKey, Direction.FORWARD)
-        }
-    }
 
     fun goBack(): Boolean {
         if (hasPendingStateChange()) {
             return true
         }
 
-        if (backstack.size <= 1) {
+        if (_backstack.size <= 1) {
             return false
         }
 
@@ -117,31 +40,17 @@ class Router internal constructor(
         return true
     }
 
-    fun jumpToRoot(): Boolean {
-        val activeBackstack = selectActiveBackstack()
-
-        if (activeBackstack.size <= 1) {
-            return false
-        }
-
-        setBackstack(listOf(activeBackstack.first()), Direction.REPLACE)
-        return true
-    }
-
     fun setBackstack(newBackstack: List<Any>, direction: Direction = Direction.REPLACE) {
         enqueueStateChange(newBackstack, direction)
     }
-
-    fun getBackstack() =
-        backstack.toList()
 
     fun setStateChanger(stateChanger: StateChanger) {
         if (this.stateChanger != stateChanger) {
             this.stateChanger = stateChanger
             if (!hasPendingStateChange()) {
-                if (backstack.isEmpty()) {
+                if (_backstack.isEmpty()) {
                     val newHistory = selectActiveBackstack()
-                    backstack.addAll(initialKeys)
+                    // todo _backstack.addAll(initialKeys)
                     enqueueStateChange(newHistory, Direction.REPLACE, true)
                 }
             } else {
@@ -172,7 +81,7 @@ class Router internal constructor(
     }
 
     fun saveInstanceState(outState: Bundle) {
-        val filteredBackstack = keyFilter.filter(backstack)
+        val filteredBackstack = keyFilter.filter(_backstack)
         val parcelledKeys = filteredBackstack.map { parceler.toParcelable(it) }
         outState.putParcelableArrayList(KEY_BACKSTACK + tag, ArrayList(parcelledKeys))
     }
@@ -189,17 +98,15 @@ class Router internal constructor(
     }
 
     private fun selectActiveBackstack(): List<Any> {
-        return if(backstack.isEmpty() && queuedStateChanges.isEmpty()) {
-            initialKeys.toList()
-        } else if(queuedStateChanges.isEmpty()) {
-            backstack.toList()
+        return if (queuedStateChanges.isEmpty()) {
+            _backstack.toList()
         } else {
             queuedStateChanges.last.newBackstack.toList()
         }
     }
 
     private fun beginStateChangeIfPossible(): Boolean {
-        if (stateChanger != null && !activityPaused && hasPendingStateChange()) {
+        if (stateChanger != null && hasPendingStateChange()) {
             val pendingStateChange = queuedStateChanges.first
             if (pendingStateChange.status == PendingStateChange.Status.ENQUEUED) {
                 pendingStateChange.status = PendingStateChange.Status.IN_PROGRESS
@@ -219,7 +126,7 @@ class Router internal constructor(
         val previousState = if (init) {
             emptyList()
         } else {
-            backstack.toList()
+            _backstack.toList()
         }
 
         val stateChange = StateChange(
@@ -241,8 +148,8 @@ class Router internal constructor(
     }
 
     private fun completeStateChange(stateChange: StateChange) {
-        backstack.clear()
-        backstack.addAll(stateChange.newState)
+        _backstack.clear()
+        _backstack.addAll(stateChange.newState)
 
         val pendingStateChange = queuedStateChanges.removeFirst()
         pendingStateChange.status = PendingStateChange.Status.COMPLETED
@@ -255,24 +162,12 @@ class Router internal constructor(
     private fun hasPendingStateChange() = queuedStateChanges.isNotEmpty()
 
     class Builder internal constructor() {
-        private val initialKeys = mutableListOf<Any>()
         private var savedInstanceState: Bundle? = null
         private var parceler: Parceler? = null
         private var keyFilter: KeyFilter? = null
         private var tag: String? = null
         private var stateChanger: StateChanger? = null
         private val stateChangeListeners = mutableListOf<StateChangeListener>()
-        private var activity: FragmentActivity? = null
-
-        fun initialKeys(vararg initialKeys: Any): Builder {
-            this.initialKeys.addAll(initialKeys)
-            return this
-        }
-
-        fun initialKeys(initialKeys: Collection<Any>): Builder {
-            this.initialKeys.addAll(initialKeys)
-            return this
-        }
 
         fun savedInstanceState(savedInstanceState: Bundle?): Builder {
             this.savedInstanceState = savedInstanceState
@@ -309,24 +204,15 @@ class Router internal constructor(
             return this
         }
 
-        fun activity(activity: FragmentActivity): Builder {
-            this.activity = activity
-            return this
-        }
-
         fun build(): Router {
-            if (initialKeys.isEmpty()) {
-                throw IllegalStateException("at least one initial key must be set")
-            }
-
-            val activity = activity ?: throw IllegalStateException("activity must be set")
             val keyParceler = parceler ?: DefaultParceler()
             val backstackFilter = keyFilter ?: DefaultKeyFilter()
             val tag = tag ?: ""
 
             val backstack = Router(
-                backstackFilter, initialKeys,
-                keyParceler, tag, stateChangeListeners, activity)
+                backstackFilter,
+                keyParceler, tag
+            )
 
             val savedInstanceState = savedInstanceState
             if (savedInstanceState != null) {
@@ -348,4 +234,44 @@ class Router internal constructor(
 
         fun newBuilder() = Builder()
     }
+}
+
+val Router.backstackSize get() = backstack.size
+
+val Router.hasRoot get() = backstackSize > 0
+
+fun Router.push(key: Any) {
+    val newBackstack = backstack.toMutableList()
+    newBackstack.add(key)
+    setBackstack(newBackstack, Direction.FORWARD)
+}
+
+fun Router.replaceTop(key: Any) {
+    val newBackstack = backstack.toMutableList()
+    if (newBackstack.isNotEmpty()) newBackstack.removeAt(newBackstack.lastIndex)
+    newBackstack.add(key)
+    setBackstack(newBackstack, Direction.REPLACE)
+}
+
+fun Router.pop(key: Any) {
+    val newBackstack = backstack.toMutableList()
+    newBackstack.removeAll { it == key }
+    setBackstack(newBackstack, Direction.BACKWARD)
+}
+
+fun Router.popTop() {
+    backstack.lastOrNull()?.let { pop(it) }
+}
+
+fun Router.popTo(key: Any) {
+    val newBackstack = backstack.dropLastWhile { it != key }
+    setBackstack(newBackstack, Direction.BACKWARD)
+}
+
+fun Router.popToRoot() {
+    backstack.firstOrNull()?.let { popTo(it) }
+}
+
+fun Router.setRoot(key: Any) {
+    setBackstack(listOf(key), Direction.FORWARD)
 }

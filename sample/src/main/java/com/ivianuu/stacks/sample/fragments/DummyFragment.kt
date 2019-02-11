@@ -22,6 +22,8 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.ivianuu.stacks.popToRoot
+import com.ivianuu.stacks.push
 import com.ivianuu.stacks.sample.R
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.view_dummy.go_to_root
@@ -60,15 +62,15 @@ class DummyFragment : Fragment() {
         val key = arguments!!.getParcelable<DummyFragmentKey>("key")
 
         title.text = "Count: ${key.count}"
-        next.setOnClickListener { stack.goTo(DummyFragmentKey(key.count + 1)) }
+        next.setOnClickListener { stack.push(DummyFragmentKey(key.count + 1)) }
         prev.setOnClickListener { stack.goBack() }
-        go_to_root.setOnClickListener { stack.jumpToRoot() }
+        go_to_root.setOnClickListener { stack.popToRoot() }
         go_up_5.setOnClickListener {
-            (1..5).forEach { stack.goTo(DummyFragmentKey(key.count + it)) }
+            (1..5).forEach { stack.push(DummyFragmentKey(key.count + it)) }
         }
 
         go_to_third.setOnClickListener {
-            stack.setBackstack(stack.getBackstack().take(3))
+            stack.setBackstack(stack.backstack.take(3))
         }
     }
 
