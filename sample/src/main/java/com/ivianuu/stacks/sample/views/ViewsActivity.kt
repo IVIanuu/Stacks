@@ -35,6 +35,7 @@ class ViewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         router = Router.newBuilder()
+            .activity(this)
             .initialKeys(DummyViewContainerKey(1))
             .savedInstanceState(savedInstanceState)
             .stateChanger(stateChanger)

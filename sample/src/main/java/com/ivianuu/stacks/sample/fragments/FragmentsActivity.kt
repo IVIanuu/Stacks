@@ -35,6 +35,7 @@ class FragmentsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         router = Router.newBuilder()
+            .activity(this)
             .initialKeys(DummyFragmentKey(1))
             .savedInstanceState(savedInstanceState)
             .stateChanger(stateChanger)
