@@ -36,10 +36,8 @@ class FragmentsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        router = Router.newBuilder()
-            .savedInstanceState(savedInstanceState)
-            .stateChanger(stateChanger)
-            .build()
+        router = Router()
+        router.setStateChanger(stateChanger)
 
         if (!router.hasRoot) {
             router.setRoot(DummyFragmentKey(1))
@@ -58,11 +56,11 @@ class FragmentsActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        router.saveInstanceState(outState)
+        // router.saveInstanceState(outState)
     }
 
     override fun onBackPressed() {
-        if (!router.goBack()) {
+        if (!router.handleBack()) {
             super.onBackPressed()
         }
     }

@@ -19,11 +19,7 @@ package com.ivianuu.stacks
 /**
  * Represents the state that will be available once state change is complete.
  */
-internal data class PendingStateChange(
-    val newBackstack: List<Any>,
-    val direction: Direction,
-    val init: Boolean
-) {
+internal class PendingStateChange(val reducer: Reducer) {
 
     var completionListener: (() -> Unit)? = null
     var status: Status = Status.ENQUEUED

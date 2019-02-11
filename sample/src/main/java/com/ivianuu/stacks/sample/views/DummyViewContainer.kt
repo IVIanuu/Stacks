@@ -21,6 +21,8 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.widget.FrameLayout
+import com.ivianuu.stacks.Direction
+import com.ivianuu.stacks.Result
 import com.ivianuu.stacks.Router
 import com.ivianuu.stacks.popToRoot
 import com.ivianuu.stacks.push
@@ -57,14 +59,14 @@ class DummyViewContainer @JvmOverloads constructor(
 
         title.text = "Count: ${key.count}"
         next.setOnClickListener { router.push(DummyViewContainerKey(key.count + 1)) }
-        prev.setOnClickListener { router.goBack() }
+        prev.setOnClickListener { router.handleBack() }
         go_to_root.setOnClickListener { router.popToRoot() }
         go_up_5.setOnClickListener {
             (1..5).forEach { router.push(DummyViewContainerKey(key.count + it)) }
         }
 
         go_to_third.setOnClickListener {
-            router.setBackstack(router.backstack.take(3))
+            router.setBackstack { Result(it.take(3), Direction.BACKWARD) }
         }
     }
 

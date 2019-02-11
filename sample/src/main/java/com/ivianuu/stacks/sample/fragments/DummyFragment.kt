@@ -22,6 +22,8 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.ivianuu.stacks.Direction
+import com.ivianuu.stacks.Result
 import com.ivianuu.stacks.popToRoot
 import com.ivianuu.stacks.push
 import com.ivianuu.stacks.sample.R
@@ -63,14 +65,14 @@ class DummyFragment : Fragment() {
 
         title.text = "Count: ${key.count}"
         next.setOnClickListener { stack.push(DummyFragmentKey(key.count + 1)) }
-        prev.setOnClickListener { stack.goBack() }
+        prev.setOnClickListener { stack.handleBack() }
         go_to_root.setOnClickListener { stack.popToRoot() }
         go_up_5.setOnClickListener {
             (1..5).forEach { stack.push(DummyFragmentKey(key.count + it)) }
         }
 
         go_to_third.setOnClickListener {
-            stack.setBackstack(stack.backstack.take(3))
+            stack.setBackstack { Result(it.take(3), Direction.BACKWARD) }
         }
     }
 
