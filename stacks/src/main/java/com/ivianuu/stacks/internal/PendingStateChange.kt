@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.ivianuu.stacks
+package com.ivianuu.stacks.internal
 
-/**
- * Represents the state that will be available once state change is complete.
- */
+import com.ivianuu.stacks.Reducer
+
 internal class PendingStateChange(val reducer: Reducer) {
 
     var completionListener: (() -> Unit)? = null

@@ -37,6 +37,7 @@ class FragmentsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         router = Router()
+        router.restoreInstanceState(savedInstanceState?.getBundle(KEY_ROUTER_STATE))
         router.setStateChanger(stateChanger)
 
         if (!router.hasRoot) {
@@ -56,12 +57,16 @@ class FragmentsActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        // router.saveInstanceState(outState)
+        outState.putBundle(KEY_ROUTER_STATE, router.saveInstanceState())
     }
 
     override fun onBackPressed() {
         if (!router.handleBack()) {
             super.onBackPressed()
         }
+    }
+
+    private companion object {
+        private const val KEY_ROUTER_STATE = "FragmentsActivity.routerState"
     }
 }

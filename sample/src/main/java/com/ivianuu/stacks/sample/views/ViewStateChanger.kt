@@ -16,10 +16,14 @@
 
 package com.ivianuu.stacks.sample.views
 
+import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import com.ivianuu.stacks.Router
+import com.ivianuu.stacks.SavedStateRegistry
 import com.ivianuu.stacks.StateChange
 import com.ivianuu.stacks.StateChanger
 
@@ -31,20 +35,26 @@ class ViewStateChanger(
     private val inflater: LayoutInflater
 ) : StateChanger {
 
-    private val savedStates = mutableMapOf<Any, SparseArray<Parcelable>>()
-
     override fun handleStateChange(stateChange: StateChange, listener: () -> Unit) {
+        println("handle state change $stateChange")
+
         val topOldKey = stateChange.previousState.lastOrNull()
         if (topOldKey != null) {
-            val oldView = container.getChildAt(0)
+            val oldView: View? = container.getChildAt(0)
 
-            if (stateChange.newState.contains(topOldKey)) {
-                val savedState = SparseArray<Parcelable>()
-                oldView.saveHierarchyState(savedState)
-                savedStates[topOldKey] = savedState
+            if (oldView != null) {
+                if (stateChange.newState.contains(topOldKey)) {
+                    val savedState = SparseArray<Parcelable>()
+                    oldView.saveHierarchyState(savedState)
+
+                    val bundle = Bundle()
+                    bundle.putSparseParcelableArray("hierarchy", savedState)
+
+                    stateChange.router.savedStateRegistry[topOldKey] = bundle
+                }
+
+                container.removeView(oldView)
             }
-
-            container.removeView(oldView)
         }
 
         val topNewKey = stateChange.newState.lastOrNull()
@@ -57,7 +67,9 @@ class ViewStateChanger(
                 view.key = topNewKey
             }
 
-            val savedState = savedStates[topNewKey]
+            val bundle = stateChange.router.savedStateRegistry.get<Bundle>(topNewKey)
+            val savedState = bundle?.getSparseParcelableArray<Parcelable>("hierarchy")
+
             if (savedState != null) {
                 view.restoreHierarchyState(savedState)
             }
@@ -65,13 +77,39 @@ class ViewStateChanger(
             container.addView(view)
         }
 
-        savedStates.keys.toList().forEach { key ->
-            if (!stateChange.newState.contains(key)) {
-                savedStates.remove(key)
-            }
-        }
+        stateChange.previousState
+            .filterNot { stateChange.newState.contains(it) }
+            .forEach { stateChange.router.savedStateRegistry.remove(it) }
 
         listener()
     }
 
+    override fun onAttach(router: Router) {
+        super.onAttach(router)
+        println("on attach")
+    }
+
+    override fun onActive(router: Router) {
+        super.onActive(router)
+        println("on active")
+    }
+
+    override fun onInactive(router: Router) {
+        super.onInactive(router)
+        println("on inactive")
+    }
+
+    override fun onDetach(router: Router) {
+        super.onDetach(router)
+        println("on detach")
+    }
+
+    override fun onSaveInstanceState(
+        router: Router,
+        backstack: List<Any>,
+        registry: SavedStateRegistry
+    ) {
+        super.onSaveInstanceState(router, backstack, registry)
+        println("on save instance state")
+    }
 }

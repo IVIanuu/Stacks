@@ -37,6 +37,7 @@ class ViewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         router = Router()
+        router.restoreInstanceState(savedInstanceState?.getBundle(KEY_ROUTER_STATE))
         router.setStateChanger(stateChanger)
 
         if (!router.hasRoot) {
@@ -46,17 +47,22 @@ class ViewsActivity : AppCompatActivity() {
 
     override fun onResumeFragments() {
         super.onResumeFragments()
-        router.setStateChanger(stateChanger)
+        router.paused = false
     }
 
     override fun onPause() {
-        router.removeStateChanger()
+        router.paused = true
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        router.removeStateChanger()
+        super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        //router.saveInstanceState(outState)
+        outState.putBundle(KEY_ROUTER_STATE, router.saveInstanceState())
     }
 
     override fun onBackPressed() {
@@ -65,4 +71,7 @@ class ViewsActivity : AppCompatActivity() {
         }
     }
 
+    private companion object {
+        private const val KEY_ROUTER_STATE = "ViewsActivity.routerState"
+    }
 }

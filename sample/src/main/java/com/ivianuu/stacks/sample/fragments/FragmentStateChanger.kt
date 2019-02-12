@@ -68,13 +68,9 @@ class FragmentStateChanger(
         listener()
     }
 
-    private fun createFragment(key: Any) : Fragment {
-        if (key is FragmentKey) {
-            return key.createFragment()
-        } else {
-            throw IllegalStateException("$key is not a FragmentKey")
-        }
-    }
+    private fun createFragment(key: Any): Fragment =
+        (key as? FragmentKey)?.createFragment() ?: error("key is not a fragment key")
 
     private fun getFragmentTag(key: Any) = key.toString()
+
 }
