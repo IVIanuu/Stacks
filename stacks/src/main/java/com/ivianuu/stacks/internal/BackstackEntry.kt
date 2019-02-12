@@ -21,6 +21,6 @@ internal data class BackstackEntry(
 
 @Parcelize
 internal data class ParceledBackstackEntry(
-    val savedKey: SavedState,
+    val parceledKey: Parcelable,
     val transactionIndex: Int
 ) : Parcelable

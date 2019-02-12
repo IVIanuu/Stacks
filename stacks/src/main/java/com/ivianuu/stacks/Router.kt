@@ -3,7 +3,6 @@ package com.ivianuu.stacks
 import android.os.Bundle
 import com.ivianuu.stacks.internal.BackstackEntry
 import com.ivianuu.stacks.internal.DefaultParceler
-import com.ivianuu.stacks.internal.DelegatingStateChanger
 import com.ivianuu.stacks.internal.ParceledBackstackEntry
 import com.ivianuu.stacks.internal.PendingStateChange
 import com.ivianuu.stacks.internal.TransactionIndexer
@@ -32,23 +31,6 @@ class Router(val parentRouter: Router? = null) {
     private val isRootRouter get() = parentRouter != null
 
     var popsLastKey = false
-
-    val savedStateRegistry = SavedStateRegistry(this)
-
-    var paused = false
-        set(value) {
-            if (field != value) {
-                field = value
-                if (value) {
-                    stateChanger?.onInactive(this)
-                } else {
-                    stateChanger?.onActive(this)
-                }
-                if (!value) {
-                    beginStateChangeIfPossible()
-                }
-            }
-        }
 
     fun handleBack(): Boolean {
         val canGoBack = (popsLastKey && backstack.isNotEmpty()
@@ -80,10 +62,7 @@ class Router(val parentRouter: Router? = null) {
     fun setStateChanger(stateChanger: StateChanger) {
         if (this.stateChanger != stateChanger) {
             removeStateChanger()
-            this.stateChanger = DelegatingStateChanger(stateChanger).also {
-                it.onAttach(this)
-                if (!paused) it.onActive(this)
-            }
+            this.stateChanger = stateChanger
 
             if (queuedStateChanges.isEmpty()) {
                 // todo rebind
@@ -95,10 +74,6 @@ class Router(val parentRouter: Router? = null) {
     }
 
     fun removeStateChanger() {
-        stateChanger?.let {
-            it.onInactive(this)
-            it.onDetach(this)
-        }
         stateChanger = null
     }
 
@@ -109,16 +84,13 @@ class Router(val parentRouter: Router? = null) {
                 _backstack
                     .map {
                         ParceledBackstackEntry(
-                            parceler.toSavedState(it.key),
+                            parceler.toParcelable(it.key),
                             it.transactionIndex
                         )
                     }
             )
         )
         putBoolean(KEY_POPS_LAST_KEY, popsLastKey)
-
-        stateChanger?.onSaveInstanceState(this@Router, _backstack, savedStateRegistry)
-        putBundle(KEY_SAVED_STATE_MANAGER, savedStateRegistry.saveInstanceState())
 
         if (isRootRouter) {
             putBundle(KEY_TRANSACTION_INDEXER, transactionIndexer.saveInstanceState())
@@ -132,17 +104,13 @@ class Router(val parentRouter: Router? = null) {
             savedInstanceState.getParcelableArrayList<ParceledBackstackEntry>(KEY_BACKSTACK)!!
                 .map {
                     BackstackEntry(
-                        parceler.fromSavedState(it.savedKey),
+                        parceler.fromParcelable(it.parceledKey),
                         it.transactionIndex
                     )
                 }
         )
 
         popsLastKey = savedInstanceState.getBoolean(KEY_POPS_LAST_KEY)
-
-        savedStateRegistry.restoreInstanceState(
-            savedInstanceState.getBundle(KEY_SAVED_STATE_MANAGER)!!
-        )
 
         if (isRootRouter) {
             transactionIndexer.restoreInstanceState(
@@ -158,7 +126,7 @@ class Router(val parentRouter: Router? = null) {
     }
 
     private fun beginStateChangeIfPossible(): Boolean {
-        if (stateChanger != null && !paused && queuedStateChanges.isNotEmpty()) {
+        if (stateChanger != null && queuedStateChanges.isNotEmpty()) {
             val pendingStateChange = queuedStateChanges.first
             if (pendingStateChange.status == PendingStateChange.Status.ENQUEUED) {
                 pendingStateChange.status = PendingStateChange.Status.IN_PROGRESS
@@ -221,7 +189,6 @@ class Router(val parentRouter: Router? = null) {
     private companion object {
         private const val KEY_BACKSTACK = "Router.backstack"
         private const val KEY_POPS_LAST_KEY = "Router.popsLastKey"
-        private const val KEY_SAVED_STATE_MANAGER = "Router.savedStateRegistry"
         private const val KEY_TRANSACTION_INDEXER = "Router.transactionIndexer"
     }
 }

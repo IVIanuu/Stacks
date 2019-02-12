@@ -22,8 +22,7 @@ import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.ivianuu.stacks.Router
-import com.ivianuu.stacks.SavedStateRegistry
+import com.ivianuu.stacks.Parceler
 import com.ivianuu.stacks.StateChange
 import com.ivianuu.stacks.StateChanger
 
@@ -32,8 +31,11 @@ import com.ivianuu.stacks.StateChanger
  */
 class ViewStateChanger(
     private val container: ViewGroup,
-    private val inflater: LayoutInflater
+    private val inflater: LayoutInflater,
+    private val parceler: Parceler
 ) : StateChanger {
+
+    private val savedStates = mutableMapOf<Any, Any>()
 
     override fun handleStateChange(stateChange: StateChange, listener: () -> Unit) {
         println("handle state change $stateChange")
@@ -50,7 +52,7 @@ class ViewStateChanger(
                     val bundle = Bundle()
                     bundle.putSparseParcelableArray("hierarchy", savedState)
 
-                    stateChange.router.savedStateRegistry[topOldKey] = bundle
+                    savedStates[topOldKey] = bundle
                 }
 
                 container.removeView(oldView)
@@ -67,7 +69,7 @@ class ViewStateChanger(
                 view.key = topNewKey
             }
 
-            val bundle = stateChange.router.savedStateRegistry.get<Bundle>(topNewKey)
+            val bundle = savedStates[topNewKey] as? Bundle
             val savedState = bundle?.getSparseParcelableArray<Parcelable>("hierarchy")
 
             if (savedState != null) {
@@ -79,37 +81,34 @@ class ViewStateChanger(
 
         stateChange.previousState
             .filterNot { stateChange.newState.contains(it) }
-            .forEach { stateChange.router.savedStateRegistry.remove(it) }
+            .forEach { savedStates.remove(it) }
 
         listener()
     }
 
-    override fun onAttach(router: Router) {
-        super.onAttach(router)
-        println("on attach")
+    fun restoreInstanceState(savedInstanceState: Bundle?) {
+        savedStates.clear()
+        if (savedInstanceState == null) return
+
+        val keys = savedInstanceState.getParcelableArrayList<Parcelable>(KEY_SAVED_STATE_KEYS)!!
+            .map { parceler.fromParcelable(it) }
+        val values = savedInstanceState.getParcelableArrayList<Parcelable>(KEY_SAVED_STATE_VALUES)!!
+
+        keys.forEachIndexed { i, key -> savedStates[key] = values[i] }
     }
 
-    override fun onActive(router: Router) {
-        super.onActive(router)
-        println("on active")
+    fun saveInstanceState(): Bundle = Bundle().apply {
+        putParcelableArrayList(KEY_SAVED_STATE_KEYS, ArrayList(
+            savedStates.keys.map { parceler.toParcelable(it) }
+        ))
+        putParcelableArrayList(
+            KEY_SAVED_STATE_VALUES, ArrayList(
+                savedStates.keys.map { parceler.toParcelable(it) }
+            ))
     }
 
-    override fun onInactive(router: Router) {
-        super.onInactive(router)
-        println("on inactive")
-    }
-
-    override fun onDetach(router: Router) {
-        super.onDetach(router)
-        println("on detach")
-    }
-
-    override fun onSaveInstanceState(
-        router: Router,
-        backstack: List<Any>,
-        registry: SavedStateRegistry
-    ) {
-        super.onSaveInstanceState(router, backstack, registry)
-        println("on save instance state")
+    private companion object {
+        private const val KEY_SAVED_STATE_KEYS = "ViewStateChanger.savedStateKeys"
+        private const val KEY_SAVED_STATE_VALUES = "ViewStateChanger.savedStateValues"
     }
 }
